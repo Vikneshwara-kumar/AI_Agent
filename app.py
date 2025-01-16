@@ -9,7 +9,7 @@ def initialize_groq_client():
     """Initialize Groq client with API key from environment or Streamlit secrets"""
     # Try getting API key from environment first
     api_key = st.secrets.get("GROQ_API_KEY") or os.getenv("GROQ_API_KEY")
-
+    
     if not api_key:
         st.error("GROQ API key not found. Please configure it in Streamlit secrets or environment variables.")
         st.stop()
@@ -168,7 +168,7 @@ def main():
 
     # Show configuration status
     st.sidebar.header("Configuration")
-    if not st.secrets.get("GROQ_API_KEY") and not os.getenv("GROQ_API_KEY"):
+    if hasattr(st, 'secrets') and 'GROQ_API_KEY' in st.secrets:
         st.sidebar.success("API Key configured ✓")
     else:
         st.sidebar.error("API Key not configured ✗")
