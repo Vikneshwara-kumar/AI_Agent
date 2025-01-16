@@ -1,18 +1,48 @@
 import streamlit as st
 import os
 from groq import Groq
-from typing import List, Dict
+from typing import List, Dict, Optional
 import time
 
-# Initialize Groq client without proxies
-if 'GROQ_API_KEY' in os.environ:
-    client = Groq(st.secrets.get("GROQ_API_KEY"))
-else:
-    client = None
+def initialize_groq_client() -> Optional[Groq]:
+    """
+    Initialize Groq client using API key from environment or Streamlit secrets.
+    Returns None if no valid API key is found.
+    """
+    try:
+        # Check Streamlit secrets first (for Cloud deployment)
+        if 'GROQ_API_KEY' in st.secrets:
+            return Groq(api_key=st.secrets['GROQ_API_KEY'])
+        
+        # Check environment variables (for local development)
+        elif 'GROQ_API_KEY' in os.environ:
+            return Groq(api_key=os.environ['GROQ_API_KEY'])
+        
+        return None
+        
+    except Exception as e:
+        st.error(f"Error initializing Groq client: {str(e)}")
+        return None
 
-def initialize_groq_client(api_key: str) -> Groq:
-    """Initialize Groq client with API key"""
-    return Groq(api_key=api_key)
+# Initialize the client
+client = initialize_groq_client()
+
+# If no client is initialized, show API key input in sidebar
+if client is None:
+    st.sidebar.warning("No Groq API key found in environment or secrets.")
+    api_key = st.sidebar.text_input("Enter your Groq API Key:", type="password")
+    
+    if api_key:
+        try:
+            client = Groq(api_key=api_key)
+            st.sidebar.success("Groq client initialized successfully!")
+        except Exception as e:
+            st.sidebar.error(f"Error initializing Groq client: {str(e)}")
+
+# Verify client initialization before proceeding
+if client is None:
+    st.warning("Please provide a valid Groq API key to continue.")
+    st.stop()
 
 
 def truncate_text(text: str, max_words: int = 500) -> str:
@@ -156,20 +186,6 @@ Provide:
 def main():
     st.title("PRD Analyzer App 🚀 🚀 ")
     st.write("This app helps you analyze and enhance your PRD by leveraging AI-powered agents to provide feedback, persona analysis, and facilitate discussions.")
-
-    # Sidebar for configuration
-    st.sidebar.header("Configuration")
-    if 'GROQ_API_KEY' not in os.environ:
-        api_key = st.sidebar.text_input("Enter Groq API Key", type="password")
-        if api_key:
-            try:
-                global client
-                client = initialize_groq_client(api_key)
-                os.environ['GROQ_API_KEY'] = api_key
-                st.sidebar.success("Groq API key configured successfully!")
-            except Exception as e:
-                st.sidebar.error(f"Error initializing Groq client: {str(e)}")
-                return
 
     # Main content
     st.header("Input PRD")
