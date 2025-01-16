@@ -4,15 +4,24 @@ from groq import Groq
 from typing import List, Dict
 import time
 
-# Initialize Groq client without proxies
-if 'GROQ_API_KEY' in os.environ:
-    client = Groq(api_key=os.environ["GROQ_API_KEY"])
-else:
-    client = None
+# Initialize Groq client
+def initialize_groq_client():
+    """Initialize Groq client with API key from environment or Streamlit secrets"""
+    # Try getting API key from environment first
+    api_key = st.secrets.get("GROQ_API_KEY") or os.getenv("GROQ_API_KEY")
 
-def initialize_groq_client(api_key: str) -> Groq:
-    """Initialize Groq client with API key"""
+    if not api_key:
+        st.error("GROQ API key not found. Please configure it in Streamlit secrets or environment variables.")
+        st.stop()
+    
     return Groq(api_key=api_key)
+
+# Initialize Groq client
+try:
+    client = initialize_groq_client()
+except Exception as e:
+    st.error(f"Failed to initialize Groq client: {str(e)}")
+    st.stop()
 
 def truncate_text(text: str, max_words: int = 500) -> str:
     """Truncate text to a maximum number of words"""
@@ -157,19 +166,19 @@ def main():
     st.write("This app helps you analyze and enhance your PRD by leveraging AI-powered agents to provide feedback, persona analysis, and facilitate discussions.")
 
 
-    # Sidebar for configuration
+    # Show configuration status
     st.sidebar.header("Configuration")
-    if 'GROQ_API_KEY' not in os.environ:
-        api_key = st.sidebar.text_input("Enter Groq API Key", type="password")
-        if api_key:
-            try:
-                global client
-                client = initialize_groq_client(api_key)
-                os.environ['GROQ_API_KEY'] = api_key
-                st.sidebar.success("Groq API key configured successfully!")
-            except Exception as e:
-                st.sidebar.error(f"Error initializing Groq client: {str(e)}")
-                return
+    if not st.secrets.get("GROQ_API_KEY") and not os.getenv("GROQ_API_KEY"):
+        st.sidebar.success("API Key configured ✓")
+    else:
+        st.sidebar.error("API Key not configured ✗")
+        st.sidebar.markdown("""
+        ### How to configure API Key:
+        1. Go to Streamlit Cloud dashboard
+        2. Click on your app's settings
+        3. Add secret: `GROQ_API_KEY`
+        """)
+        st.stop()
 
     # Main content
     st.header("Input PRD")
