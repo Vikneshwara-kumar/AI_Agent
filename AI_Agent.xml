@@ -1,0 +1,10 @@
+AI_Agent/
+├── app.py
+├── requirements.txt
+├── Dockerfile
+├── .env.example
+├── .gitignore
+├── README.md
+├── LICENSE
+└── test/
+    └── Sample_prd.txt
