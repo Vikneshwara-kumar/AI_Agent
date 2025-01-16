@@ -4,8 +4,16 @@ from groq import Groq
 from typing import List, Dict
 import time
 
-# Initialize Groq client
-client = Groq(api_key=st.secrets.get("GROQ_API_KEY"))
+# Initialize Groq client without proxies
+if 'GROQ_API_KEY' in os.environ:
+    client = Groq(st.secrets.get("GROQ_API_KEY"))
+else:
+    client = None
+
+def initialize_groq_client(api_key: str) -> Groq:
+    """Initialize Groq client with API key"""
+    return Groq(api_key=api_key)
+
 
 def truncate_text(text: str, max_words: int = 500) -> str:
     """Truncate text to a maximum number of words"""
@@ -148,6 +156,20 @@ Provide:
 def main():
     st.title("PRD Analyzer App 🚀 🚀 ")
     st.write("This app helps you analyze and enhance your PRD by leveraging AI-powered agents to provide feedback, persona analysis, and facilitate discussions.")
+
+    # Sidebar for configuration
+    st.sidebar.header("Configuration")
+    if 'GROQ_API_KEY' not in os.environ:
+        api_key = st.sidebar.text_input("Enter Groq API Key", type="password")
+        if api_key:
+            try:
+                global client
+                client = initialize_groq_client(api_key)
+                os.environ['GROQ_API_KEY'] = api_key
+                st.sidebar.success("Groq API key configured successfully!")
+            except Exception as e:
+                st.sidebar.error(f"Error initializing Groq client: {str(e)}")
+                return
 
     # Main content
     st.header("Input PRD")
