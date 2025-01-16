@@ -8,7 +8,7 @@ import time
 def initialize_groq_client():
     """Initialize Groq client with API key from environment or Streamlit secrets"""
     # Try getting API key from environment first
-    api_key = st.secrets.get("GROQ_API_KEY") or os.getenv("GROQ_API_KEY")
+    api_key = st.secrets.get("GROQ_API_KEY")
     
     if not api_key:
         st.error("GROQ API key not found. Please configure it in Streamlit secrets or environment variables.")
