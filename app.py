@@ -5,23 +5,7 @@ from typing import List, Dict
 import time
 
 # Initialize Groq client
-def initialize_groq_client():
-    """Initialize Groq client with API key from environment or Streamlit secrets"""
-    # Try getting API key from environment first
-    api_key = st.secrets.get("GROQ_API_KEY")
-    
-    if not api_key:
-        st.error("GROQ API key not found. Please configure it in Streamlit secrets or environment variables.")
-        st.stop()
-    
-    return Groq(api_key=api_key)
-
-# Initialize Groq client
-try:
-    client = initialize_groq_client()
-except Exception as e:
-    st.error(f"Failed to initialize Groq client: {str(e)}")
-    st.stop()
+client = Groq(api_key=st.secrets.get("GROQ_API_KEY"))
 
 def truncate_text(text: str, max_words: int = 500) -> str:
     """Truncate text to a maximum number of words"""
@@ -164,21 +148,6 @@ Provide:
 def main():
     st.title("PRD Analyzer App 🚀 🚀 ")
     st.write("This app helps you analyze and enhance your PRD by leveraging AI-powered agents to provide feedback, persona analysis, and facilitate discussions.")
-
-
-    # Show configuration status
-    st.sidebar.header("Configuration")
-    if hasattr(st, 'secrets') and 'GROQ_API_KEY' in st.secrets:
-        st.sidebar.success("API Key configured ✓")
-    else:
-        st.sidebar.error("API Key not configured ✗")
-        st.sidebar.markdown("""
-        ### How to configure API Key:
-        1. Go to Streamlit Cloud dashboard
-        2. Click on your app's settings
-        3. Add secret: `GROQ_API_KEY`
-        """)
-        st.stop()
 
     # Main content
     st.header("Input PRD")
