@@ -278,8 +278,8 @@ class Orchestrator:
                            for section, content in sections_summary.items()])
 
 def main():
-    st.title("Enhanced PRD Analyzer 🚀")
-    st.write("Upload your PRD for multi-agent analysis and improvement suggestions.")
+    st.title("PRD Improviser🚀")
+    st.write("This app helps you analyze and enhance your PRD by leveraging AI-powered agents to provide Stakeholder's feedback, analysis, and facilitate discussions. Upload your PRD for multi-agent analysis and improvement suggestions.")
 
     # Initialize client
     client = initialize_groq_client()
