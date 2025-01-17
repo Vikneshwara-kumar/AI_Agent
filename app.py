@@ -53,7 +53,7 @@ def truncate_text(text: str, max_words: int = 500) -> str:
     return text
 
 class Agent:
-    def __init__(self, role: str, expertise: str):
+    def __init__(self, role: str, expertise: List[str]):
         self.role = role
         self.expertise = expertise
     
@@ -75,7 +75,7 @@ class Agent:
             response = client.chat.completions.create(
                 messages=[{"role": "user", "content": prompt}],
                 model="llama-3.3-70b-versatile",
-                temperature=0.7,
+                temperature=0.3,
                 max_tokens=1000
             )
             return response.choices[0].message.content
@@ -85,20 +85,20 @@ class Agent:
     def analyze_personas(self, prd_text: str) -> str:
         truncated_prd = truncate_text(prd_text, 300)
         
-        prompt = f"""As a {self.role}, provide brief persona analysis (max 300 words):
+        prompt = f"""As a {self.role}, analyze the user personas in this PRD section:
         
         PRD Text: {truncated_prd}
         
         Focus on:
-        1. User persona alignment
+        1. Key user personas and their needs
         2. Missing user considerations
-        3. Key improvements needed"""
+        3. Suggestions for enhancing user experience"""
         
         try:
             response = client.chat.completions.create(
                 messages=[{"role": "user", "content": prompt}],
                 model="llama-3.3-70b-versatile",
-                temperature=0.7,
+                temperature=0.3,
                 max_tokens=1000
             )
             return response.choices[0].message.content
@@ -108,13 +108,12 @@ class Agent:
 class Orchestrator:
     def __init__(self):
         self.agents = {
-            "UX Lead": Agent("UX Lead", "user experience and interface design"),
-            "Data Scientist": Agent("Data Scientist", "data analytics and machine learning"),
-            "Software Engineer": Agent("Software Engineer", "technical implementation and architecture"),
-            "Finance Manager": Agent("Finance Manager", "cost analysis and resource allocation"),
-            "Marketing Director": Agent("Marketing Director", "market positioning and user needs"),
-            "Senior Product Strategy Expert":Agent("Senior Product Strategy Expert", "product vision, market trends, and strategic planning")
-
+            "UX Lead": Agent("UX Lead", ["user experience", "interaction design", "accessibility"]),
+            "Data Scientist": Agent("Data Scientist", ["data requirements", "analytics", "technical feasibility", "machine learning"]),
+            "Software Engineer": Agent("Software Engineer", ["technical implementation", "software architecture", "scalability", "security", "performance", "API design"]),
+            "Finance Manager": Agent("Finance Manager", ["cost analysis", "resource allocation", "financial feasibility","ROI","budgeting","pricing strategy"]),
+            "Marketing Director": Agent("Marketing Director", ["market positioning", "user needs" "customer acquisition", "branding", "marketing strategy"]),
+            "Senior Product Strategy Expert":Agent("Senior Product Expert", ["product vision", "market trends", "strategic planning", "product-market fit", "competitive analysis"]),
         }
     
     def facilitate_debate(self, prd_text: str) -> Dict[str, str]:
@@ -136,7 +135,7 @@ class Orchestrator:
         combined_feedback = "\n".join([f"{role}: {truncate_text(comment, 100)}" 
                                      for role, comment in feedback.items()])
         
-        prompt = f"""Synthesize a brief discussion summary (max 300 words):
+        prompt = f"""Synthesize a brief discussion summary (max 800 words):
 
 Key Feedback Points:
 {combined_feedback}
@@ -150,7 +149,7 @@ Focus on:
             response = client.chat.completions.create(
                 messages=[{"role": "user", "content": prompt}],
                 model="llama-3.3-70b-versatile",
-                temperature=0.7,
+                temperature=0.3,
                 max_tokens=800
             )
             return response.choices[0].message.content
@@ -176,7 +175,7 @@ Provide:
             response = client.chat.completions.create(
                 messages=[{"role": "user", "content": prompt}],
                 model="llama-3.3-70b-versatile",
-                temperature=0.7,
+                temperature=0.3,
                 max_tokens=4000
             )
             return response.choices[0].message.content
