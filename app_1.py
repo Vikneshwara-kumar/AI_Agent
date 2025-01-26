@@ -5,6 +5,47 @@ from typing import List, Dict, Optional
 import time
 from dataclasses import dataclass
 from enum import Enum
+from docx import Document
+from docx.shared import Pt
+from io import BytesIO
+
+def convert_md_to_docx(md_text: str) -> BytesIO:
+    """Convert markdown text to structured Word document"""
+    doc = Document()
+    
+    # Add title style
+    style = doc.styles['Title']
+    font = style.font
+    font.name = 'Arial'
+    font.size = Pt(24)
+    
+    # Add heading styles
+    for level in range(1, 4):
+        style = doc.styles[f'Heading {level}']
+        font = style.font
+        font.name = 'Arial'
+        font.size = Pt(24 - (level * 2))
+        font.bold = True
+    
+    # Parse markdown content
+    current_heading = None
+    for line in md_text.split('\n'):
+        line = line.strip()
+        if line.startswith('# '):
+            doc.add_heading(line[2:], level=1)
+        elif line.startswith('## '):
+            doc.add_heading(line[3:], level=2)
+        elif line.startswith('### '):
+            doc.add_heading(line[4:], level=3)
+        elif line:
+            p = doc.add_paragraph(line)
+            p.style = 'BodyText'
+    
+    # Save to in-memory buffer
+    buffer = BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+    return buffer
 
 class PRDSection(Enum):
     INTRODUCTION = "Introduction"
@@ -303,12 +344,12 @@ def main():
     if st.button("Analyze PRD") and prd_text:
         orchestrator = Orchestrator(client)
         
-        # Create tabs for workflow steps
-        parse_tab, analysis_tab, debate_tab, final_tab = st.tabs([
+        # Create tabs for workflow steps - CHANGED ORDER HERE
+        final_tab, parse_tab, analysis_tab, debate_tab = st.tabs([
+            "4. Improved PRD",  # Now first
             "1. Parse PRD",
             "2. Analysis",
-            "3. Debate",
-            "4. Improved PRD"
+            "3. Debate"
         ])
         
         # Step 1: Parse PRD
@@ -318,7 +359,7 @@ def main():
             
             for section, content in prd_content.sections.items():
                 with st.expander(section.value):
-                    st.write(content)
+                    st.write(content) 
         
         # Step 2: Generate Analysis
         with analysis_tab:
@@ -339,7 +380,7 @@ def main():
             debate = orchestrator.facilitate_debate(feedback)
             st.write(debate)
         
-        # Step 4: Generate Improved PRD
+        # Step 4: Generate Improved PRD (Now first tab)
         with final_tab:
             st.header("Improved PRD")
             improved_prd = orchestrator.generate_improved_prd(
@@ -347,24 +388,28 @@ def main():
                 feedback,
                 debate
             )
+
+            # Convert to Word document
+            docx_file = convert_md_to_docx(improved_prd)
             
-            # Show diff or side-by-side comparison
-            col1, col2 = st.columns(2)
-            with col1:
-                st.subheader("Original PRD")
-                st.write(prd_text)
-            
-            with col2:
-                st.subheader("Improved PRD")
-                st.write(improved_prd)
-            
-            # Download buttons
+            # Download button at the top
             st.download_button(
                 "Download Improved PRD",
-                improved_prd,
-                file_name="improved_prd.md",
-                mime="text/markdown"
+                data=docx_file,
+                file_name="improved_prd.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             )
+            
+            # Dropdown comparisons
+            with st.expander("🔽 Compare Original vs Improved PRD", expanded=False):
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.subheader("Original PRD")
+                    st.write(prd_text)
+                
+                with col2:
+                    st.subheader("Improved PRD")
+                    st.write(improved_prd)
             
             # Optional feedback
             st.divider()
