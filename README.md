@@ -1,6 +1,6 @@
 # PRD Improver - AI-Powered PRD Analysis System
 
-An intelligent, multi-agent system designed to analyze and improve Product Requirement Documents (PRDs). Utilizing Groq's LLaMA 3.3 model (or Gemma 2.1 model) and Streamlit, it provides actionable insights, persona-specific feedback, and a collaborative platform for PRD enhancement.
+An intelligent, multi-agent system designed to analyze and improve Product Requirement Documents (PRDs). Utilizing Groq's `gemma2-9b-it` model and Streamlit, it provides actionable insights, persona-specific feedback, and a collaborative platform for PRD enhancement.
 
 ---
 
@@ -24,7 +24,7 @@ An intelligent, multi-agent system designed to analyze and improve Product Requi
 - **Collaborative Discussion Synthesis**: Combines input from agents to provide a holistic summary of PRD improvements.
 - **Comprehensive Recommendations**: Offers actionable insights, including clarity improvements, gap identification, and optimization suggestions.
 - **Interactive User Interface**: Built with Streamlit, featuring intuitive navigation and an easy-to-use dashboard.
-- **Advanced Model Integration**: Seamlessly integrates with Groq's LLaMA 3.3 model or Gemma 2.1 model for enhanced natural language understanding.
+- **Advanced Model Integration**: Seamlessly integrates with Groq's `gemma2-9b-it` model for enhanced natural language understanding.
 
 ---
 
